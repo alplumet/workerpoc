@@ -28,11 +28,33 @@
  */
 
 // Import necessary modules.
+require('dotenv').config();
 const express = require('express'); // Express is a minimal and flexible Node.js web application framework.
 const fileUpload = require('express-fileupload'); // Middleware for handling `multipart/form-data` (file uploads).
 const { Worker } = require('worker_threads'); // Node.js native module for spawning worker threads.
+const { createClient } = require('redis');
 const Queue = require('bull'); // Job and message queue based on Redis.
 const os = require('os'); // Node.js native module to access OS-specific properties and methods.
+
+/* (async () => {
+    try {
+      createClient({ url: process.env.REDIS_CONNECTION_STRING }).then(() => console.log('connected'));
+    } catch (err) {
+      console.log('error connection redis db: ', err);
+    }
+}); */
+
+/* const client = createClient({ url: process.env.REDIS_CONNECTION_STRING });
+client.connect().then(() => console.log('connected'));
+
+client.on('error', err => console.log('Redis Client Error', err)); */
+const queueOptions = {
+    redis: {
+      tls: {},
+      connectTimeout: 30000,
+    },
+    url: `rediss://default:${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+  };
 
 const app = express(); // Initialize an Express application.
 
@@ -41,7 +63,12 @@ app.use(fileUpload());
 
 // Initialize the job queue named 'file-processing' using Redis as the storage backend.
 // Here, the Redis instance is running locally on the default port 6379.
-const processingQueue = new Queue('file-processing', 'redis://127.0.0.1:6379');
+console.log(process.env.REDIS_USERNAME);
+console.log(process.env.REDIS_PASSWORD);
+console.log(process.env.REDIS_PORT);
+console.log(process.env.REDIS_HOST);
+const processingQueue = new Queue('file-processing', `rediss://default:${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`, queueOptions);
+console.log(processingQueue.client.status);
 
 // Define the endpoint for file uploads. This is the main endpoint where files will be POSTed for processing.
 app.post('/upload', (req, res) => {
