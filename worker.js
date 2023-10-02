@@ -5,6 +5,7 @@
  * data and the parentPort to communicate the results back to the parent thread.
  */
 const { parentPort, workerData } = require('worker_threads');
+const e = require('express');
 
 /**
  * The csv-parser is a Node.js package that provides a fast CSV parsing and stringifying 
@@ -34,13 +35,15 @@ function isPrime(num) {
  * mimic some complex processing on each row.
  */
 function processRow(row) {
-    // Simulated CPU-intensive task to introduce a delay
-    for (let i = 0; i < 1e7; i++) {} 
-
-    // Here we check if the 'someNumericField' from our CSV is a prime number.
-    // More complex processing logic can be added here if necessary.
-    if (isPrime(row.someNumericField)) {
-        // Add more complex processing here if necessary
+     // Assuming that the row is an object where the keys are the column headers
+    // and the values are the values for those columns in that row, 
+    // let's process each value.
+    for (const columnValue of Object.values(row)) {
+        const number = parseInt(columnValue, 10);
+  
+        if (isPrime(number)) {
+            console.log(`Number ${number} is prime!`);
+        }
     }
 }
 
@@ -49,11 +52,13 @@ function processRow(row) {
  * Then we pipe this stream through the csv-parser to process each row.
  * After all rows are processed, we send a message back to the parent thread.
  */
-const stream = Readable.from(workerData.toString());
+
+const stream = Readable.from(workerData);
 stream.pipe(csv())
-    .on('data', (row) => {
-        processRow(row);
-    })
-    .on('end', () => {
-        parentPort.postMessage('Processing complete');
-    });
+  .on('data', (row) => {
+      console.log(row);
+      processRow(row);
+  })
+  .on('end', () => {
+      parentPort.postMessage('Processing complete');
+  });
