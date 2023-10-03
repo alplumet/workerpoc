@@ -68,10 +68,12 @@ async function clearQueue() {
   console.log("Queue cleared");
 }
 clearQueue();
+console.log(processingQueue);
 
 // Define the endpoint for file uploads. This is the main endpoint where files will be POSTed for processing.
 app.post('/upload', (req, res) => {
     // Check if there are any uploaded files.
+    console.log(req.files);
     if (!req.files || Object.keys(req.files).length === 0) {
         return res.status(400).send('No files were uploaded.');
     }
@@ -99,7 +101,10 @@ processingQueue.process(os.cpus().length, (job) => {
         const worker = new Worker('./worker.js', { workerData: job.data.fileData });
 
         // Listen for messages from the worker thread. This can be the result or any other messages.
-        worker.on('message', resolve);
+        worker.on('message', (message) => {
+          console.log(message);  // Log the message from the worker
+          resolve();
+        });
 
         // Handle any errors from the worker thread.
         worker.on('error', reject);
