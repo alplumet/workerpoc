@@ -49,7 +49,7 @@ async function processRow(row) {
             if (isPrime(number)) {
                 console.log(`Number ${number} is prime!`);
             }
-            await sleep(1000); // Pause for 1 second
+            // await sleep(1000); // Pause for 1 second
         }
     }
   }

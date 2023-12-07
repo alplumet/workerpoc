@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const numRows = 10000;   // number of rows in the CSV
+const numRows = 20000;   // number of rows in the CSV
 const numbersPerRow = 10; // number of numbers in each row
 const maxNumber = 1e6;  // maximum random number value
 

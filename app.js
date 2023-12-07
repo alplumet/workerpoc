@@ -68,7 +68,6 @@ async function clearQueue() {
   console.log("Queue cleared");
 }
 clearQueue();
-console.log(processingQueue);
 
 // Define the endpoint for file uploads. This is the main endpoint where files will be POSTed for processing.
 app.post('/upload', (req, res) => {
@@ -89,6 +88,7 @@ app.post('/upload', (req, res) => {
 
 // Define a simple status endpoint. This can be used to test if the server's main event loop is blocked.
 app.get('/status', (req, res) => {
+    console.log('- - - - - - - status console log - - - - - -');
     res.send('Event loop is not blocked');
 });
 
@@ -96,7 +96,6 @@ app.get('/status', (req, res) => {
 // We aim to process jobs in parallel based on the number of CPUs available. 
 processingQueue.process(os.cpus().length, (job) => {
     return new Promise((resolve, reject) => {
-        console.log(job);
         // Initialize a worker thread and pass the file data to it for processing.
         const worker = new Worker('./worker.js', { workerData: job.data.fileData });
 
